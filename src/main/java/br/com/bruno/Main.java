@@ -28,85 +28,69 @@ public class Main {
                 new Funcionario("Helena", LocalDate.of(1996, 9, 2), new BigDecimal("2799.93"), "Gerente")
         );
 
-        for(Funcionario func : inputDoUsuario) {
+        for (Funcionario func : inputDoUsuario) {
             funcionarios.add(func);
         }
 
         //Remover o funcionário João
-        for(int i = 0; i < funcionarios.size(); i++) {
-            if(funcionarios.get(i).nome.equals("João")) {
+        for (int i = 0; i < funcionarios.size(); i++) {
+            if (funcionarios.get(i).nome.equals("João")) {
                 funcionarios.remove(i);
                 i--;
             }
         }
 
         //Exibir todos
-        System.out.println("Exibir todos");
+        System.out.println("################################### Exibir todos ###################################");
         for (Funcionario funcionario : funcionarios) {
             System.out.println(funcionario.toString());
         }
 
         //Atualizar lista na parte de salário em 10%
-        for(int i = 0; i < funcionarios.size(); i++) {
+        for (int i = 0; i < funcionarios.size(); i++) {
             Funcionario funcionario = funcionarios.get(i);
             BigDecimal salario_reajuste = BigDecimal.valueOf(10).divide(BigDecimal.valueOf(100));
             funcionario.salario = funcionario.salario.multiply(salario_reajuste);
         }
 
-        Map<String, List<Funcionario>> grupo_funcao = new HashMap();
-        //Agrupar funcionários por função em um hashlist (MAP) key (funcao)
-        for(Funcionario funcionario : funcionarios) {
-            grupo_funcao.computeIfAbsent(funcionario.funcao, k -> new ArrayList<>())
-                    .add(funcionario);
-        }
 
-        //Imprimir os funcionários por funcao
-        System.out.println("Por função:");
-        for (Map.Entry<String, List<Funcionario>> entry : grupo_funcao.entrySet()) {
-            System.out.println(entry.getKey() + ": " + entry.getValue().stream()
-                    .map(f -> f.nome)
-                    .toList());
-        }
+        Map<String, Runnable> commands = new HashMap<>();
+        commands.put("a", () -> minimumSalary(funcionarios));
+        commands.put("b", () -> totalSalary(funcionarios));
+        commands.put("c", () -> alphabeticOrder(funcionarios));
+        commands.put("d", () -> older(funcionarios));
+        commands.put("e", () -> birthdayInMonth(funcionarios));
+        commands.put("f", () -> byRole(funcionarios));
 
-        //Imprimir quem faz aniversario mês 10 e 12
-        System.out.println("Aniversário mês 10 e 12:");
-        for (Funcionario funcionario : funcionarios) {
-            int mes = funcionario.data_nascimento.getMonthValue();
-            if(mes == 10 || mes == 12) {
-                System.out.println(funcionario.toString());
+        Scanner scanner = new Scanner(System.in);
+        boolean isRunning = true;
+        while (isRunning) {
+
+            System.out.println("######################################################################################");
+            System.out.println("Lista de comandos:");
+            System.out.print("a - Ver quantidade de salários mínimos ### b - Ver total dos salários\n");
+            System.out.print("c - Ver funcionarios em ordem alfabética ### d - Ver funcionário mais velho\n");
+            System.out.print("e - Ver aniversários mês 10 e 12 ### f - Ver funcionários por função\n");
+            System.out.println("Digite um comando ou 'exit' para sair:");
+
+            String input = scanner.nextLine().toLowerCase();
+            if (input.equals("exit")) {
+                isRunning = false;
+            } else {
+                // Busca e executa a função correspondente, se existir
+                Runnable action = commands.get(input);
+                if (action != null) {
+                    action.run();
+                } else {
+                    System.out.println("Comando não existe, insira um comando válido!");
+                }
             }
         }
+        scanner.close();
+    }
 
-        //Imprimir o mais velho, mostrando nome e idade
-        Funcionario maisVelho = funcionarios.get(0);
-        for (Funcionario funcionario : funcionarios) {
-            if (funcionario.data_nascimento.isBefore(maisVelho.data_nascimento)) {
-                maisVelho = funcionario;
-            }
-        }
-        System.out.println("O funcionário mais velho é " + maisVelho.nome + " com " +
-                Period.between(maisVelho.data_nascimento, LocalDate.now()).getYears() + " anos");
-
-        //Imprimir em ordem alfabética
-        System.out.println("Ordem alfabética:");
-        List<Funcionario> funcionarios_ordenados = new ArrayList<>(funcionarios);
-        // Ordena pelo nome em ordem alfabética (A-Z)
-        funcionarios_ordenados.sort(Comparator.comparing(f -> f.nome));
-
-        // Imprime em ordem alfabética
-        System.out.println("Ordem alfabética:");
-        for (Funcionario funcionario : funcionarios_ordenados) {
-            System.out.println(funcionario);
-        }
-
-        //Imprimir o total dos salários
-        BigDecimal total_salarios = BigDecimal.ZERO;
-        for (Funcionario funcionario : funcionarios) {
-            total_salarios = total_salarios.add(funcionario.salario);
-        }
-        System.out.println("Total dos salários: " + total_salarios);
-
-
+    private static void minimumSalary(List<Funcionario> funcionarios) {
+        System.out.println("##################### Quantidade de salários mínimos ####################################### ");
         BigDecimal salarioMinimo = new BigDecimal("1212.00");
         //Imprimir quantos salários mínimos ganha cada funcionário
         for (Funcionario funcionario : funcionarios) {
@@ -117,6 +101,69 @@ public class Main {
             System.out.println(funcionario.nome + " ganha " + qtdSalarios + " salários mínimos.");
         }
     }
+    private static void totalSalary(List<Funcionario> funcionarios) {
+        //Imprimir o total dos salários
+        BigDecimal total_salarios = BigDecimal.ZERO;
+        for (Funcionario funcionario : funcionarios) {
+            total_salarios = total_salarios.add(funcionario.salario);
+        }
+        System.out.println("##################### Total dos salários ###########################");
+        System.out.println("Total: " + total_salarios);
+    }
+    private static void alphabeticOrder(List<Funcionario> funcionarios) {
+        List<Funcionario> funcionarios_ordenados = new ArrayList<>(funcionarios);
+        // Ordena pelo nome em ordem alfabética (A-Z)
+        funcionarios_ordenados.sort(Comparator.comparing(f -> f.nome));
+
+        // Imprime em ordem alfabética
+        System.out.println("################################### Ordem alfabética: ######################################");
+        for (Funcionario funcionario : funcionarios_ordenados) {
+            System.out.println(funcionario);
+        }
+    }
+    private static void older(List<Funcionario> funcionarios) {
+        //Imprimir o mais velho, mostrando nome e idade
+        Funcionario maisVelho = funcionarios.get(0);
+        for (Funcionario funcionario : funcionarios) {
+            if (funcionario.data_nascimento.isBefore(maisVelho.data_nascimento)) {
+                maisVelho = funcionario;
+            }
+        }
+
+        System.out.println("########################### O funcionário mais velho ############################# ");
+        System.out.println("O funcionário mais velho é " + maisVelho.nome + " com " +
+                Period.between(maisVelho.data_nascimento, LocalDate.now()).getYears() + " anos");
+
+    }
+    private static void birthdayInMonth(List<Funcionario> funcionarios) {
+        //Imprimir quem faz aniversario mês 10 e 12
+        System.out.println("################################# Aniversário mês 10 e 12 #################################");
+        for (Funcionario funcionario : funcionarios) {
+            int mes = funcionario.data_nascimento.getMonthValue();
+            if (mes == 10 || mes == 12) {
+                System.out.println(funcionario.toString());
+            }
+        }
+    }
+    private static void byRole(List<Funcionario> funcionarios) {
+        Map<String, List<Funcionario>> grupo_funcao = new HashMap();
+        //Agrupar funcionários por função em um hashlist (MAP) key (funcao)
+        for (Funcionario funcionario : funcionarios) {
+            grupo_funcao.computeIfAbsent(funcionario.funcao, k -> new ArrayList<>())
+                    .add(funcionario);
+        }
+
+        //Imprimir os funcionários por funcao
+        System.out.println("################################### Por função ###################################");
+        for (Map.Entry<String, List<Funcionario>> entry : grupo_funcao.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue().stream()
+                    .map(f -> f.nome)
+                    .toList());
+        }
+    }
+
+
+
 }
 
 //Se for um INPUT do usuário e ele escolher a operação, será mais legal.
